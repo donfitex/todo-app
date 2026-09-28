@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tasks</title>
+<style>
+:root{--bg:#f5f6f4;--card:#fff;--fg:#1c2220;--mut:#6f7772;--acc:#2f6f5e;--acc2:#e3f0eb;--line:#e2e5e1;--hi:#c2410c;--med:#b7791f;--low:#3b7a57;--bad:#b42318;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--card:#1e2320;--fg:#ecefeb;--mut:#8d958f;--acc:#5fb59d;--acc2:#23332d;--line:#303733;--hi:#fb923c;--med:#facc15;--low:#6ee7a0;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#141816;--card:#1e2320;--fg:#ecefeb;--mut:#8d958f;--acc:#5fb59d;--acc2:#23332d;--line:#303733;--hi:#fb923c;--med:#facc15;--low:#6ee7a0;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:680px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{font-size:26px;margin:0}
+.sub{color:var(--mut);margin:2px 0 0;font-size:13px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 10px}
+button:hover{border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.prog{margin:18px 0 14px;padding:14px}
+.bar{height:8px;background:var(--acc2);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}
+.stats{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+.add{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:12px;margin-bottom:14px}
+.add input[type=text],.dbtn,.add select,.search{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px}
+.dbtn{cursor:pointer;text-align:left;white-space:nowrap;color:var(--fg)}
+.dp{position:relative}.dp .dbtn{width:100%;height:100%}
+.cal[hidden]{display:none}
+.cal{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:264px;max-width:calc(100vw - 32px);padding:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ch button,.cf button{padding:4px 10px}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cg .wd{font-size:11px;color:var(--mut);padding:4px 0}
+.cg button{border:0;background:transparent;padding:7px 0;border-radius:8px}
+.cg button:hover{background:var(--acc2)}
+.cg button.td{border:1px solid var(--acc)}
+.cg button.sel{background:var(--acc);color:#fff}
+.cf{display:flex;justify-content:space-between;margin-top:8px}
+.add .go{background:var(--acc);color:#fff;border-color:var(--acc);padding:0 16px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.search{flex:1;min-width:140px}
+.tabs{display:flex;gap:4px}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+li.drag{opacity:.4}li.over{border-color:var(--acc)}
+.grip{color:var(--mut);cursor:grab;user-select:none}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.body{flex:1;min-width:0}
+.txt{word-break:break-word;cursor:text}
+li.done .txt{text-decoration:line-through;color:var(--mut)}
+.meta{display:flex;gap:8px;font-size:12px;color:var(--mut);margin-top:2px}
+.tag{font-weight:600}.tag.high{color:var(--hi)}.tag.medium{color:var(--med)}.tag.low{color:var(--low)}
+.late{color:var(--bad);font-weight:600}
+.edit{width:100%;border:1px solid var(--acc);border-radius:6px;padding:4px 6px;background:var(--bg)}
+.x{border:0;background:transparent;color:var(--mut);font-size:18px;padding:2px 6px}
+.x:hover{color:var(--bad)}
+.empty{text-align:center;color:var(--mut);padding:28px 0}
+.foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:12px}
+.link{border:0;background:none;color:var(--mut);text-decoration:underline;padding:0}
+#bk{display:none;padding:12px;margin-top:12px}
+#bk textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);padding:8px;font:12px ui-monospace,monospace}
+#bk .row{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px;color:var(--mut)}
+@media(max-width:520px){.add{grid-template-columns:1fr 1fr}.add input[type=text]{grid-column:1/-1}.add .go{grid-column:1/-1;padding:9px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div><h1>Tasks</h1><p class="sub" id="today"></p></div>
+  <button id="theme" aria-label="Toggle theme">Theme</button>
+</header>
+
+<section class="card prog">
+  <div class="stats"><span id="s1"></span><span id="s2"></span></div>
+  <div class="bar"><i id="fill"></i></div>
+</section>
+
+<section class="card add">
+  <input type="text" id="in" placeholder="Add a task" aria-label="Task" maxlength="200" autocomplete="off">
+  <select id="pri" aria-label="Priority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+  <div class="dp"><button type="button" class="dbtn" id="dueBtn" aria-haspopup="dialog" aria-expanded="false">📅 Due date</button><div class="cal" id="cal" role="dialog" aria-label="Choose due date" hidden></div></div>
+  <button class="go" id="addBtn">Add</button>
+</section>
+
+<div class="tools">
+  <input class="search" id="q" type="search" placeholder="Search tasks" aria-label="Search">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<ul id="list"></ul>
+
+<div class="foot">
+  <button class="link" id="clear">Clear completed</button>
+  <button class="link" id="bkBtn">Backup / restore</button>
+</div>
+
+<section class="card" id="bk">
+  <textarea id="ta" aria-label="Backup data" spellcheck="false"></textarea>
+  <div class="row">
+    <button id="copy">Copy</button><button id="load">Load pasted data</button><span id="msg"></span>
+  </div>
+</section>
+</main>
+
+<script>
+var KEY="tasks-pro-v1",TK="tasks-theme",todos=[],filter="all",q="",dragId=null;
+function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function put(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+try{todos=JSON.parse(get(KEY)||"[]");if(!Array.isArray(todos))todos=[]}catch(e){todos=[]}
+var th=get(TK);if(th)document.documentElement.setAttribute("data-theme",th);
+function $(id){return document.getElementById(id)}
+function save(){put(KEY,JSON.stringify(todos))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+$("today").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+
+$("theme").onclick=function(){
+  var cur=document.documentElement.getAttribute("data-theme");
+  var dark=cur?cur==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  var n=dark?"light":"dark";document.documentElement.setAttribute("data-theme",n);put(TK,n);
+};
+
+function fmtDue(d){
+  var t=iso(new Date()),dt=new Date(d+"T00:00:00");
+  if(d===t)return "Due today";
+  var tm=new Date();tm.setDate(tm.getDate()+1);if(d===iso(tm))return "Due tomorrow";
+  return "Due "+dt.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+
+function render(){
+  var tabs=$("tabs");tabs.innerHTML="";
+  [["all","All"],["active","Active"],["done","Done"]].forEach(function(p){
+    var b=document.createElement("button");b.textContent=p[1];if(filter===p[0])b.className="on";
+    b.onclick=function(){filter=p[0];render()};tabs.appendChild(b);
+  });
+  var total=todos.length,done=todos.filter(function(t){return t.done}).length;
+  $("s1").textContent=done+" of "+total+" completed";
+  $("s2").textContent=total?Math.round(done/total*100)+"%":"";
+  $("fill").style.width=(total?done/total*100:0)+"%";
+
+  var today=iso(new Date()),term=q.toLowerCase();
+  var shown=todos.filter(function(t){
+    if(filter==="active"&&t.done)return false;
+    if(filter==="done"&&!t.done)return false;
+    return !term||t.text.toLowerCase().indexOf(term)>-1;
+  });
+  var ul=$("list");ul.innerHTML="";
+  if(!shown.length){var e=document.createElement("div");e.className="empty";e.textContent=total?"No tasks match.":"No tasks yet. Add your first one above.";ul.appendChild(e)}
+  var canDrag=filter==="all"&&!term;
+  shown.forEach(function(t){
+    var li=document.createElement("li");if(t.done)li.className="done";
+    if(canDrag){
+      li.draggable=true;
+      li.ondragstart=function(){dragId=t.id;li.classList.add("drag")};
+      li.ondragend=function(){dragId=null;render()};
+      li.ondragover=function(ev){ev.preventDefault();li.classList.add("over")};
+      li.ondragleave=function(){li.classList.remove("over")};
+      li.ondrop=function(ev){
+        ev.preventDefault();if(!dragId||dragId===t.id)return;
+        var from=todos.findIndex(function(o){return o.id===dragId});
+        var m=todos.splice(from,1)[0];
+        todos.splice(todos.findIndex(function(o){return o.id===t.id}),0,m);save();render();
+      };
+      var g=document.createElement("span");g.className="grip";g.textContent="⋮⋮";g.setAttribute("aria-hidden","true");li.appendChild(g);
+    }
+    var c=document.createElement("input");c.type="checkbox";c.checked=t.done;c.setAttribute("aria-label","Complete task");
+    c.onchange=function(){t.done=c.checked;save();render()};
+    var b=document.createElement("div");b.className="body";
+    var s=document.createElement("div");s.className="txt";s.textContent=t.text;s.title="Double-click to edit";
+    s.ondblclick=function(){
+      var i=document.createElement("input");i.className="edit";i.value=t.text;i.maxLength=200;
+      b.replaceChild(i,s);i.focus();i.select();
+      var fin=function(ok){var v=i.value.trim();if(ok&&v)t.text=v;save();render()};
+      i.onkeydown=function(ev){if(ev.key==="Enter")fin(true);if(ev.key==="Escape")fin(false)};
+      i.onblur=function(){fin(true)};
+    };
+    var m=document.createElement("div");m.className="meta";
+    var p=document.createElement("span");p.className="tag "+t.pri;p.textContent=t.pri[0].toUpperCase()+t.pri.slice(1);m.appendChild(p);
+    if(t.due){var d=document.createElement("span");d.textContent=fmtDue(t.due);
+      if(!t.done&&t.due<today){d.className="late";d.textContent="Overdue · "+d.textContent.replace("Due ","")}
+      m.appendChild(d)}
+    b.append(s,m);
+    var x=document.createElement("button");x.className="x";x.textContent="×";x.setAttribute("aria-label","Delete task");
+    x.onclick=function(){todos=todos.filter(function(o){return o.id!==t.id});save();render()};
+    li.append(c,b,x);ul.appendChild(li);
+  });
+}
+
+function add(){
+  var v=$("in").value.trim();if(!v)return;
+  todos.unshift({id:uid(),text:v,done:false,pri:$("pri").value,due:dueVal});
+  $("in").value="";setDue("");$("pri").value="medium";save();render();$("in").focus();
+}
+$("addBtn").onclick=add;
+$("in").onkeydown=function(e){if(e.key==="Enter")add()};
+$("q").oninput=function(){q=this.value;render()};
+$("clear").onclick=function(){todos=todos.filter(function(t){return !t.done});save();render()};
+
+$("bkBtn").onclick=function(){
+  var b=$("bk");b.style.display=b.style.display==="block"?"none":"block";
+  $("ta").value=JSON.stringify(todos,null,1);$("msg").textContent="";
+};
+$("copy").onclick=function(){
+  $("ta").value=JSON.stringify(todos,null,1);$("ta").select();
+  try{navigator.clipboard.writeText($("ta").value).then(function(){$("msg").textContent="Copied"},function(){$("msg").textContent="Press Ctrl/Cmd+C"})}
+  catch(e){$("msg").textContent="Press Ctrl/Cmd+C"}
+};
+$("load").onclick=function(){
+  try{
+    var a=JSON.parse($("ta").value);if(!Array.isArray(a))throw 0;
+    todos=a.filter(function(t){return t&&typeof t.text==="string"}).map(function(t){
+      return {id:t.id||uid(),text:t.text.slice(0,200),done:!!t.done,pri:["low","medium","high"].indexOf(t.pri)>-1?t.pri:"medium",due:/^\d{4}-\d{2}-\d{2}$/.test(t.due||"")?t.due:""};
+    });
+    save();render();$("msg").textContent="Loaded "+todos.length+" tasks";
+  }catch(e){$("msg").textContent="That doesn't look like valid backup data"}
+};
+var dueVal="",cv=new Date();cv.setDate(1);
+function setDue(v){dueVal=v;$("dueBtn").textContent="📅 "+(v?new Date(v+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"Due date")}
+function closeCal(){$("cal").hidden=true;$("dueBtn").setAttribute("aria-expanded","false")}
+function mk(tag,txt,fn,label){var e=document.createElement(tag);if(txt)e.textContent=txt;if(fn){e.type="button";e.onclick=fn}if(label)e.setAttribute("aria-label",label);return e}
+function drawCal(){
+  var c=$("cal");c.innerHTML="";
+  var h=document.createElement("div");h.className="ch";
+  h.append(mk("button","‹",function(){cv.setMonth(cv.getMonth()-1);drawCal()},"Previous month"),
+    mk("strong",cv.toLocaleDateString(undefined,{month:"long",year:"numeric"})),
+    mk("button","›",function(){cv.setMonth(cv.getMonth()+1);drawCal()},"Next month"));
+  c.appendChild(h);
+  var g=document.createElement("div");g.className="cg";
+  ["S","M","T","W","T","F","S"].forEach(function(w){var s=mk("span",w);s.className="wd";g.appendChild(s)});
+  var y=cv.getFullYear(),m=cv.getMonth(),first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),today=iso(new Date());
+  for(var i=0;i<first;i++)g.appendChild(document.createElement("span"));
+  for(var d=1;d<=n;d++){(function(d){
+    var v=iso(new Date(y,m,d)),b=mk("button",String(d),function(){setDue(v);closeCal()});
+    if(v===today)b.className="td";if(v===dueVal)b.className+=" sel";g.appendChild(b);
+  })(d)}
+  c.appendChild(g);
+  var f=document.createElement("div");f.className="cf";
+  f.append(mk("button","Today",function(){setDue(iso(new Date()));closeCal()}),mk("button","Clear",function(){setDue("");closeCal()}));
+  c.appendChild(f);
+}
+$("cal").onclick=function(e){e.stopPropagation()};
+$("dueBtn").onclick=function(e){
+  e.stopPropagation();var c=$("cal");
+  if(!c.hidden){closeCal();return}
+  cv=dueVal?new Date(dueVal+"T00:00:00"):new Date();cv.setDate(1);drawCal();
+  c.hidden=false;this.setAttribute("aria-expanded","true");
+};
+document.addEventListener("click",closeCal);
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeCal()});
+render();
+</script>
+</body>
+</html>
