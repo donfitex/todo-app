@@ -76,6 +76,8 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
 .authwrap .switch button{border:0;background:none;color:var(--acc);text-decoration:underline;padding:0;cursor:pointer}
 .authwrap .err{color:var(--bad);font-size:13px;min-height:18px;margin:-4px 0 8px}
 .authwrap .hint{color:var(--mut);font-size:12px;margin:-6px 0 10px}
+.forgot{text-align:right;margin:-4px 0 10px}
+.forgot button{border:0;background:none;color:var(--mut);font-size:12px;text-decoration:underline;padding:0;cursor:pointer}
 .or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:4px 0 14px}
 .or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
 #topbar{display:none;justify-content:flex-end;align-items:center;gap:10px;max-width:680px;margin:0 auto;padding:10px 16px 0;font-size:13px;color:var(--mut)}
@@ -99,6 +101,7 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
   <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
   <div class="hint" id="pwHint" hidden>Use at least 6 characters.</div>
   <input type="password" id="pw2" placeholder="Confirm password" autocomplete="new-password" hidden>
+  <div class="forgot" id="forgotWrap"><button id="forgotBtn" type="button">Forgot password?</button></div>
   <button class="primary" id="submitBtn" type="button">Sign in</button>
   <div class="switch" id="switchWrap">Don't have an account? <button id="switchBtn" type="button">Sign up</button></div>
 </div>
@@ -170,8 +173,8 @@ function $(id){return document.getElementById(id)}
 function setMode(m){
   mode=m;$("authErr").textContent="";
   $("pw2").value="";
-  if(m==="signin"){$("authTitle").textContent="Welcome back";$("authSub").textContent="Sign in to see your tasks.";$("submitBtn").textContent="Sign in";$("pw2").hidden=true;$("pwHint").hidden=true;$("pw").autocomplete="current-password";$("switchWrap").innerHTML='Don\u2019t have an account? <button id="switchBtn" type="button">Sign up</button>';}
-  else{$("authTitle").textContent="Create an account";$("authSub").textContent="Sign up to start saving tasks.";$("submitBtn").textContent="Sign up";$("pw2").hidden=false;$("pwHint").hidden=false;$("pw").autocomplete="new-password";$("switchWrap").innerHTML='Already have an account? <button id="switchBtn" type="button">Sign in</button>';}
+  if(m==="signin"){$("authTitle").textContent="Welcome back";$("authSub").textContent="Sign in to see your tasks.";$("submitBtn").textContent="Sign in";$("pw2").hidden=true;$("pwHint").hidden=true;$("forgotWrap").hidden=false;$("pw").autocomplete="current-password";$("switchWrap").innerHTML='Don\u2019t have an account? <button id="switchBtn" type="button">Sign up</button>';}
+  else{$("authTitle").textContent="Create an account";$("authSub").textContent="Sign up to start saving tasks.";$("submitBtn").textContent="Sign up";$("pw2").hidden=false;$("pwHint").hidden=false;$("forgotWrap").hidden=true;$("pw").autocomplete="new-password";$("switchWrap").innerHTML='Already have an account? <button id="switchBtn" type="button">Sign in</button>';}
   $("switchBtn").onclick=function(){setMode(mode==="signin"?"signup":"signin")};
 }
 setMode("signin");
@@ -192,11 +195,30 @@ $("submitBtn").onclick=function(){
   var p=mode==="signin"?auth.signInWithEmailAndPassword(email,pw):auth.createUserWithEmailAndPassword(email,pw);
   p.catch(authErr);
 };
+$("forgotBtn").onclick=function(){
+  var email=$("email").value.trim();
+  if(!email){$("authErr").textContent="Enter your email above first, then click 'Forgot password?'.";return}
+  $("authErr").textContent="";
+  auth.sendPasswordResetEmail(email).then(function(){
+    $("authErr").style.color="var(--acc)";
+    $("authErr").textContent="Reset email sent — check your inbox.";
+  }).catch(function(e){
+    $("authErr").style.color="";
+    authErr(e);
+  });
+};
 $("googleBtn").onclick=function(){
   $("authErr").textContent="";
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(authErr);
+  var provider=new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:"select_account"});
+  auth.signInWithPopup(provider).catch(authErr);
 };
-$("signout").onclick=function(){auth.signOut()};
+$("signout").onclick=function(){
+  auth.signOut().then(function(){
+    $("email").value="";$("pw").value="";$("pw2").value="";
+    setMode("signin");
+  });
+};
 
 auth.onAuthStateChanged(function(user){
   if(unsub){unsub();unsub=null}
@@ -206,6 +228,7 @@ auth.onAuthStateChanged(function(user){
     listenTasks(user.uid);
   }else{
     $("authwrap").hidden=false;$("topbar").style.display="none";$("appwrap").style.display="none";
+    $("email").value="";$("pw").value="";$("pw2").value="";
     todos=[];render();
   }
 });
