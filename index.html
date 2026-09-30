@@ -75,6 +75,7 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
 .authwrap .switch{text-align:center;font-size:13px;color:var(--mut)}
 .authwrap .switch button{border:0;background:none;color:var(--acc);text-decoration:underline;padding:0;cursor:pointer}
 .authwrap .err{color:var(--bad);font-size:13px;min-height:18px;margin:-4px 0 8px}
+.authwrap .hint{color:var(--mut);font-size:12px;margin:-6px 0 10px}
 .or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:4px 0 14px}
 .or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
 #topbar{display:none;justify-content:flex-end;align-items:center;gap:10px;max-width:680px;margin:0 auto;padding:10px 16px 0;font-size:13px;color:var(--mut)}
@@ -96,6 +97,8 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
   <div class="or">or</div>
   <input type="email" id="email" placeholder="Email" autocomplete="email">
   <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+  <div class="hint" id="pwHint" hidden>Use at least 6 characters.</div>
+  <input type="password" id="pw2" placeholder="Confirm password" autocomplete="new-password" hidden>
   <button class="primary" id="submitBtn" type="button">Sign in</button>
   <div class="switch" id="switchWrap">Don't have an account? <button id="switchBtn" type="button">Sign up</button></div>
 </div>
@@ -166,8 +169,9 @@ var mode="signin";
 function $(id){return document.getElementById(id)}
 function setMode(m){
   mode=m;$("authErr").textContent="";
-  if(m==="signin"){$("authTitle").textContent="Welcome back";$("authSub").textContent="Sign in to see your tasks.";$("submitBtn").textContent="Sign in";$("switchWrap").innerHTML='Don\u2019t have an account? <button id="switchBtn" type="button">Sign up</button>';}
-  else{$("authTitle").textContent="Create an account";$("authSub").textContent="Sign up to start saving tasks.";$("submitBtn").textContent="Sign up";$("switchWrap").innerHTML='Already have an account? <button id="switchBtn" type="button">Sign in</button>';}
+  $("pw2").value="";
+  if(m==="signin"){$("authTitle").textContent="Welcome back";$("authSub").textContent="Sign in to see your tasks.";$("submitBtn").textContent="Sign in";$("pw2").hidden=true;$("pwHint").hidden=true;$("pw").autocomplete="current-password";$("switchWrap").innerHTML='Don\u2019t have an account? <button id="switchBtn" type="button">Sign up</button>';}
+  else{$("authTitle").textContent="Create an account";$("authSub").textContent="Sign up to start saving tasks.";$("submitBtn").textContent="Sign up";$("pw2").hidden=false;$("pwHint").hidden=false;$("pw").autocomplete="new-password";$("switchWrap").innerHTML='Already have an account? <button id="switchBtn" type="button">Sign in</button>';}
   $("switchBtn").onclick=function(){setMode(mode==="signin"?"signup":"signin")};
 }
 setMode("signin");
@@ -180,6 +184,10 @@ function authErr(e){
 $("submitBtn").onclick=function(){
   var email=$("email").value.trim(),pw=$("pw").value;
   if(!email||!pw){$("authErr").textContent="Enter an email and password.";return}
+  if(mode==="signup"){
+    if(pw.length<6){$("authErr").textContent="Password should be at least 6 characters.";return}
+    if(pw!==$("pw2").value){$("authErr").textContent="Passwords don't match.";return}
+  }
   $("authErr").textContent="";
   var p=mode==="signin"?auth.signInWithEmailAndPassword(email,pw):auth.createUserWithEmailAndPassword(email,pw);
   p.catch(authErr);
