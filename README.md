@@ -2,7 +2,7 @@
 
 A clean, fast todo list that runs entirely in the browser. No installs, no build step, no dependencies.
 
-**Live app:** https://https://donfitex.netlify.app/
+**Live app:** https://donfitex.netlify.app/
 
 ## Features
 
