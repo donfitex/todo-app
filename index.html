@@ -98,6 +98,8 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
       Continue with Google
     </button>
     <div class="or">or</div>
+    <button class="google" id="guestBtn" type="button">Continue as guest</button>
+    <div class="or">or</div>
     <input type="email" id="email" placeholder="Email" autocomplete="email">
     <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
     <div class="hint" id="pwHint" hidden>Use at least 6 characters.</div>
@@ -147,6 +149,7 @@ li.done .txt{text-decoration:line-through;color:var(--mut)}
 
 <div class="foot">
   <button class="link" id="clear">Clear completed</button>
+  <button class="link" id="sample">Load sample data</button>
   <button class="link" id="bkBtn">Backup / restore</button>
 </div>
 
@@ -229,6 +232,10 @@ $("resetSendBtn").onclick=function(){
     $("resetErr").textContent=m[e.code]||e.message;
   });
 };
+$("guestBtn").onclick=function(){
+  $("authErr").textContent="";
+  auth.signInAnonymously().catch(authErr);
+};
 $("googleBtn").onclick=function(){
   $("authErr").textContent="";
   var provider=new firebase.auth.GoogleAuthProvider();
@@ -246,7 +253,7 @@ auth.onAuthStateChanged(function(user){
   if(unsub){unsub();unsub=null}
   if(user){
     $("authwrap").hidden=true;$("topbar").style.display="flex";$("appwrap").style.display="block";
-    $("who").textContent=user.email||user.displayName||"Signed in";
+    $("who").textContent=user.isAnonymous?"Guest session":(user.email||user.displayName||"Signed in");
     listenTasks(user.uid);
   }else{
     $("authwrap").hidden=false;$("topbar").style.display="none";$("appwrap").style.display="none";
@@ -413,6 +420,21 @@ $("clear").onclick=function(){
   doneOnes.forEach(function(t){deleteTask(t.id)});render();
 };
 
+$("sample").onclick=function(){
+  if(!uidCur)return;
+  var samples=[
+    {text:"Welcome! Tap a checkbox to complete a task",pri:"low",due:""},
+    {text:"Double-click any task to edit it",pri:"medium",due:""},
+    {text:"Drag tasks by the ⋮⋮ handle to reorder",pri:"medium",due:""},
+    {text:"Finish the project proposal",pri:"high",due:iso(new Date())},
+    {text:"Buy groceries",pri:"low",due:""}
+  ];
+  samples.forEach(function(s,i){
+    var t={id:uid(),text:s.text,done:false,pri:s.pri,due:s.due,order:Date.now()-i};
+    todos.unshift(t);saveTask(t);
+  });
+  render();
+};
 $("bkBtn").onclick=function(){
   var b=$("bk");b.style.display=b.style.display==="block"?"none":"block";
   $("ta").value=JSON.stringify(todos,null,1);$("msg").textContent="";

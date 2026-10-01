@@ -43,6 +43,8 @@ A todo list app with accounts. UI, styling and logic live in `index.html` (no bu
 - [x] Forgot password (email reset link)
 - [x] Google sign-in always shows the account picker instead of reusing the last session
 - [x] Auth form fields clear on sign-out
+- [x] Guest access via anonymous sign-in, no email required, still backed by Firestore
+- [x] "Load sample data" button to seed example tasks
 
 ## Do not
 - Add a build system or npm dependencies
